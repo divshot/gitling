@@ -33,6 +33,11 @@ type Config struct {
 	ReceivePack bool
 }
 
+type AuthConfig struct {
+  ReadOnly   bool `json:"read_only"`
+  SkipCreate bool `json:"skip_create"`
+}
+
 type HandlerReq struct {
 	w    http.ResponseWriter
 	r    *http.Request
@@ -68,6 +73,7 @@ var services = map[string]Service{
 func requestHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%s %s %s %s", r.RemoteAddr, r.Method, r.URL.Path, r.Proto)
+		
 		for match, service := range services {
 			re, err := regexp.Compile(match)
 			if err != nil {
@@ -82,7 +88,18 @@ func requestHandler() http.HandlerFunc {
 
 				rpc := service.Rpc
 				file := strings.Replace(r.URL.Path, m[1]+"/", "", 1)
-				dir, err := getGitDir(m[1])
+				
+  		  authResponse, err := AuthorizeRequest(m[1], w, r, config)
+  		  if err != nil {
+  		    authErr, ok := err.(AuthError)
+  		    if ok {
+  		      renderAuthError(w, authErr)
+  		    }
+  		    log.Println(err)
+  		    return
+  		  }
+				
+				dir, err := getGitDir(authResponse.Path)
 
 				if err != nil {
 					log.Print(err)
@@ -310,6 +327,11 @@ func renderNotFound(w http.ResponseWriter) {
 func renderNoAccess(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusForbidden)
 	w.Write([]byte("Forbidden"))
+}
+
+func renderAuthError(w http.ResponseWriter, err AuthError) {
+  w.WriteHeader(err.Status)
+  w.Write([]byte(err.Message))
 }
 
 // Packet-line handling function

@@ -4,6 +4,9 @@ Gitling is a smart HTTP git server designed for multi-tenant git contexts. Gitli
 allows for making an optional HTTP authentication request to an external URL
 in order to verify a push and set its location.
 
+**Note:** Gitling only works for HTTP-based git. If you're looking for custom SSH
+git authentication (a la GitHub/Heroku), I wish you luck.
+
 ## Installation
 
 If you already have a `go` environment up and running, it's quite simple:
@@ -12,7 +15,15 @@ If you already have a `go` environment up and running, it's quite simple:
     
 If you don't, you'll need to make that happen first. Binary distribution
 
-## Authorization Endpoint
+## Usage
+
+Basic usage is as follows:
+
+    gitling --auth-url https://example.com/auth -p 8080 -r /path/to/root -b /usr/bin/git
+    
+Just try `gitling -h` if you need help with specific options.
+
+### Authorization Endpoint
 
 If you specify an authorization URL using `-a` or `--auth-url`, Gitling will make
 an HTTP `POST` request to the specified URL.The request will have a JSON body
