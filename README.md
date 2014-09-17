@@ -52,9 +52,20 @@ In addition to HTTP status codes, a `200` response should be accompanied with
 a JSON object with one or more of the following keys:
 
 * **path:** the path (relative to your project root) for the git repo.
-* **read_only:** if `true`, this user may not write to the repo, only read.
-* **skip_create:** don't create a new repository if one does not already exist.
+* **(TODO) read_only:** if `true`, this user may not write to the repo, only read.
+* **(TODO) skip_create:** don't create a new repository if one does not already exist.
 
 If you don't specify a `path`, the path specified by the user will be used. For
 error responses (401, 403) the body of the response will be printed out for the
 user to see.
+
+## Roadmap
+
+### Before Release
+
+- [ ] "Push to Create" automatically initialize a bare repo on authorized push
+- [ ] `--template, -t` to point at directory for repo template
+
+### Sometime Later
+
+- [ ] Allow for authentication via command, not just HTTP

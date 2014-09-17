@@ -6,7 +6,7 @@ import (
   "net/http"
   "strings"
   "errors"
-  // "log"
+  "log"
   "time"
   "fmt"
   
@@ -23,9 +23,9 @@ func (e AuthError) Error() string {
 }
 
 type AuthResponse struct {
-  Path string
-  ReadOnly bool
-  SkipCreate bool
+  Path string `json:"path"`
+  ReadOnly bool `json:"read_only"`
+  SkipCreate bool `json:"skip_create"`
 }
 
 func AuthorizeRequest(path string, w http.ResponseWriter, r *http.Request, config Config) (result AuthResponse, err error) {
@@ -43,10 +43,9 @@ func AuthorizeRequest(path string, w http.ResponseWriter, r *http.Request, confi
   
   reqBody, err := json.Marshal(map[string]string{"username":username, "password":password, "path":path})
   if err != nil {
-    println(err)
+    log.Println(err)
     return
   }
-  println(string(reqBody[:]))
   
   req := goreq.Request{
     Method: "POST",
@@ -64,7 +63,7 @@ func AuthorizeRequest(path string, w http.ResponseWriter, r *http.Request, confi
   
   switch res.StatusCode{
     case 200,201:
-      result = AuthResponse{"/custom/path", true, true}
+      res.Body.FromJsonTo(&result)
     case 204:
       result = AuthResponse{path, false, false} 
     case 401, 403:
